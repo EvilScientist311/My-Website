@@ -1,19 +1,27 @@
 (function () {
   "use strict";
 
+  /*
+   * Timeline state classes — keep these roles separate:
+   *   is-visible / is-revealed  → card fade-in only (IntersectionObserver)
+   *   is-active                 → active card scaling only (scroll progress)
+   *   is-reached                → dot colour/fill only (rail fill height)
+   *
+   * Never use is-visible or is-active to style dots. Never set is-reached from IO.
+   */
+
   var timeline = document.querySelector(".home-timeline");
   if (!timeline) {
     return;
   }
 
-  var track = timeline.querySelector(".home-timeline__track");
   var rail = timeline.querySelector(".home-timeline__rail");
   var fill = timeline.querySelector(".home-timeline__rail-fill");
   var items = Array.prototype.slice.call(
     timeline.querySelectorAll(".home-timeline__item")
   );
 
-  if (!track || !items.length) {
+  if (!rail || !items.length) {
     return;
   }
 
@@ -22,10 +30,20 @@
   var prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
-  var activeLineRatio = 0.55;
+  var triggerRatio = 0.7;
+  var lastIndex = items.length - 1;
+  var pageLoadScrollY = getScrollY();
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
 
   function getScrollY() {
     return window.pageYOffset || document.documentElement.scrollTop || 0;
+  }
+
+  function isInitialLoadPosition() {
+    return getScrollY() <= 1;
   }
 
   function getMaxScrollY() {
@@ -33,6 +51,10 @@
       0,
       document.documentElement.scrollHeight - window.innerHeight
     );
+  }
+
+  function getTriggerY() {
+    return window.innerHeight * triggerRatio;
   }
 
   function getDotCenterY(item) {
@@ -46,116 +68,156 @@
     return dotRect.top + dotRect.height / 2;
   }
 
-  function getTimelineProgress() {
-    var scrollY = getScrollY();
-    var viewY = window.innerHeight * activeLineRatio;
-    var viewportBottom = window.innerHeight;
-    var maxScrollY = getMaxScrollY();
-
-    var firstItemRect = items[0].getBoundingClientRect();
-    var lastDotCenter = getDotCenterY(items[items.length - 1]);
-
-    var firstItemDocTop = firstItemRect.top + scrollY;
-    var lastDotDocCenter = lastDotCenter + scrollY;
-
-    var startScroll = firstItemDocTop - viewportBottom;
-    var idealEndScroll = lastDotDocCenter - viewY;
-    var endScroll = Math.min(idealEndScroll, maxScrollY);
-
-    var progress;
-    if (scrollY >= endScroll) {
-      progress = 1;
-    } else if (scrollY <= startScroll) {
-      progress = 0;
-    } else {
-      var range = endScroll - startScroll;
-      progress = range > 0 ? (scrollY - startScroll) / range : 1;
-    }
+  function measureGeometry() {
+    var railRect = rail.getBoundingClientRect();
+    var dotOffsets = items.map(function (item) {
+      return getDotCenterY(item) - railRect.top;
+    });
 
     return {
-      progress: Math.min(1, Math.max(0, progress)),
-      viewY: viewY,
-      endScroll: endScroll,
-      atEnd: scrollY >= endScroll,
+      railRect: railRect,
+      dotOffsets: dotOffsets,
+      firstDot: dotOffsets[0],
+      lastDot: dotOffsets[lastIndex],
+      span: dotOffsets[lastIndex] - dotOffsets[0],
     };
   }
 
-  function setProgress(metrics) {
-    if (!fill || !rail) {
-      return;
-    }
-
+  function getScrollAnchors() {
+    var scrollY = getScrollY();
+    var triggerY = getTriggerY();
     var railRect = rail.getBoundingClientRect();
-    if (railRect.height <= 0) {
-      return;
-    }
+    var lastDotY = getDotCenterY(items[lastIndex]);
+    var maxScrollY = getMaxScrollY();
 
-    var lastDotCenter = getDotCenterY(items[items.length - 1]);
-    var lastDotOffset = lastDotCenter - railRect.top;
-    var fillPx = metrics.progress * lastDotOffset;
-    var fillPct = (fillPx / railRect.height) * 100;
+    var startScroll = scrollY + (railRect.top - triggerY);
+    var idealEndScroll = scrollY + (lastDotY - triggerY);
+    var endScroll = Math.min(idealEndScroll, maxScrollY);
 
-    fill.style.height = Math.min(100, Math.max(0, fillPct)) + "%";
+    return {
+      startScroll: startScroll,
+      endScroll: endScroll,
+    };
   }
 
-  function setActiveItem(metrics) {
-    var progress = metrics.progress;
-    var viewY = metrics.viewY;
-    var activeIndex = 0;
+  function getScrollProgress() {
+    if (isInitialLoadPosition()) {
+      return 0;
+    }
 
-    if (metrics.atEnd || progress >= 1) {
-      activeIndex = items.length - 1;
-    } else if (progress <= 0) {
-      activeIndex = 0;
-    } else {
-      var bestDistance = Infinity;
+    var scrollY = getScrollY();
+    var anchors = getScrollAnchors();
+    var startScroll = anchors.startScroll;
+    var endScroll = anchors.endScroll;
 
-      items.forEach(function (item, index) {
-        var dotCenter = getDotCenterY(item);
-        var distance = Math.abs(dotCenter - viewY);
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          activeIndex = index;
-        }
-      });
+    if (endScroll <= startScroll) {
+      return scrollY > endScroll ? 1 : 0;
+    }
+
+    if (pageLoadScrollY > 5) {
+      if (scrollY >= endScroll) {
+        return 1;
+      }
+      if (scrollY <= startScroll) {
+        return 0;
+      }
+      return clamp((scrollY - startScroll) / (endScroll - startScroll), 0, 1);
+    }
+
+    if (scrollY <= pageLoadScrollY) {
+      return 0;
+    }
+
+    var travelStart = Math.max(startScroll, pageLoadScrollY);
+    if (scrollY <= travelStart) {
+      return 0;
+    }
+    if (scrollY >= endScroll) {
+      return 1;
+    }
+
+    return clamp((scrollY - travelStart) / (endScroll - travelStart), 0, 1);
+  }
+
+  function getFillEndPx(geo, progress) {
+    if (geo.span <= 0) {
+      return geo.firstDot;
+    }
+
+    return geo.firstDot + progress * geo.span;
+  }
+
+  function isDotReached(fillEndPx, dotOffset) {
+    return fillEndPx >= dotOffset - 0.5;
+  }
+
+  function applyInitialState(geo) {
+    if (fill) {
+      fill.style.height = Math.max(0, geo.firstDot) + "px";
     }
 
     items.forEach(function (item, index) {
+      var isFirst = index === 0;
+      item.classList.toggle("is-reached", isFirst);
+      item.classList.toggle("is-active", isFirst);
+    });
+  }
+
+  function applyReducedMotion() {
+    var geo = measureGeometry();
+
+    items.forEach(function (item, index) {
+      item.classList.add("is-visible", "is-revealed");
+      item.classList.toggle("is-reached", true);
+      item.classList.toggle("is-active", index === lastIndex);
+    });
+
+    if (fill) {
+      fill.style.height = geo.lastDot + "px";
+    }
+  }
+
+  function updateTimeline() {
+    var geo = measureGeometry();
+
+    if (geo.railRect.height <= 0 || geo.lastDot <= geo.firstDot) {
+      if (isInitialLoadPosition()) {
+        applyInitialState(geo);
+      }
+      return;
+    }
+
+    if (isInitialLoadPosition()) {
+      applyInitialState(geo);
+      return;
+    }
+
+    var progress = clamp(getScrollProgress(), 0, 1);
+    var fillEndPx = getFillEndPx(geo, progress);
+    var activeIndex = -1;
+
+    if (fill) {
+      fill.style.height = Math.max(0, fillEndPx) + "px";
+    }
+
+    items.forEach(function (item, index) {
+      var reached = isDotReached(fillEndPx, geo.dotOffsets[index]);
+
+      if (reached) {
+        activeIndex = index;
+      }
+
+      item.classList.toggle("is-reached", reached);
       item.classList.toggle("is-active", index === activeIndex);
     });
   }
 
-  function setReachedItems(metrics) {
-    if (metrics.atEnd || metrics.progress >= 1) {
-      items.forEach(function (item) {
-        item.classList.add("is-visible");
-      });
-      return;
-    }
-
-    var viewY = metrics.viewY;
-
-    items.forEach(function (item) {
-      if (getDotCenterY(item) <= viewY + 4) {
-        item.classList.add("is-visible");
-      }
-    });
-  }
-
-  function onFrame() {
-    var metrics = getTimelineProgress();
-    setProgress(metrics);
-    setActiveItem(metrics);
-    setReachedItems(metrics);
-  }
-
   function scheduleUpdate() {
-    window.requestAnimationFrame(onFrame);
+    window.requestAnimationFrame(updateTimeline);
   }
 
   function bindImageLoadUpdates() {
-    var images = document.querySelectorAll("img");
-    images.forEach(function (img) {
+    document.querySelectorAll("img").forEach(function (img) {
       if (img.complete) {
         return;
       }
@@ -165,49 +227,57 @@
     });
   }
 
-  if (prefersReducedMotion) {
-    items.forEach(function (item) {
-      item.classList.add("is-visible");
-    });
-    if (fill) {
-      fill.style.height = "100%";
+  function bindFontLoadUpdates() {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(scheduleUpdate);
     }
-    items[items.length - 1].classList.add("is-active");
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate, { passive: true });
-    window.addEventListener("load", scheduleUpdate);
-    bindImageLoadUpdates();
-    return;
   }
 
-  if ("IntersectionObserver" in window) {
+  function bindCardRevealObserver() {
+    if (!("IntersectionObserver" in window)) {
+      items.forEach(function (item) {
+        item.classList.add("is-visible", "is-revealed");
+      });
+      return;
+    }
+
     var observer = new IntersectionObserver(
       function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
+            entry.target.classList.add("is-revealed", "is-visible");
           }
         });
       },
       {
         root: null,
-        rootMargin: "0px 0px -8% 0px",
-        threshold: 0.08,
+        rootMargin: "0px 0px -5% 0px",
+        threshold: 0.05,
       }
     );
 
     items.forEach(function (item) {
       observer.observe(item);
     });
-  } else {
-    items.forEach(function (item) {
-      item.classList.add("is-visible");
-    });
   }
 
+  if (prefersReducedMotion) {
+    applyReducedMotion();
+    bindCardRevealObserver();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.addEventListener("load", scheduleUpdate);
+    bindImageLoadUpdates();
+    bindFontLoadUpdates();
+    return;
+  }
+
+  bindCardRevealObserver();
   window.addEventListener("scroll", scheduleUpdate, { passive: true });
   window.addEventListener("resize", scheduleUpdate, { passive: true });
   window.addEventListener("load", scheduleUpdate);
   bindImageLoadUpdates();
-  onFrame();
+  bindFontLoadUpdates();
+  updateTimeline();
 })();
+

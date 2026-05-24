@@ -23,19 +23,19 @@ header:
   <h2 class="home-metrics__heading">Metrics</h2>
   <ul class="home-metrics__list">
     <li class="home-metrics__item">
-      <span class="home-metrics__value">{{ physics_notes_count }}</span>
+      <span class="home-metrics__value" data-count-up="{{ physics_notes_count }}" aria-live="polite">{{ physics_notes_count }}</span>
       <span class="home-metrics__label">Physics Notes</span>
     </li>
     <li class="home-metrics__item">
-      <span class="home-metrics__value">{{ lab_report_count }}</span>
+      <span class="home-metrics__value" data-count-up="{{ lab_report_count }}" aria-live="polite">{{ lab_report_count }}</span>
       <span class="home-metrics__label">Lab Reports</span>
     </li>
     <li class="home-metrics__item">
-      <span class="home-metrics__value">{{ project_count }}</span>
+      <span class="home-metrics__value" data-count-up="{{ project_count }}" aria-live="polite">{{ project_count }}</span>
       <span class="home-metrics__label">Projects</span>
     </li>
     <li class="home-metrics__item">
-      <span class="home-metrics__value">{{ pdf_count }}+</span>
+      <span class="home-metrics__value" data-count-up="{{ pdf_count }}" data-count-suffix="+" aria-live="polite">{{ pdf_count }}+</span>
       <span class="home-metrics__label">PDFs</span>
     </li>
   </ul>

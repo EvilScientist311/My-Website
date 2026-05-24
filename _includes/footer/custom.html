@@ -15,5 +15,9 @@
 
 {% include base_path %}
 {% if page.url == "/" %}
+<script>
+  document.body.setAttribute("data-page", "home");
+</script>
+<script defer src="{{ base_path }}/assets/js/home-polish.js"></script>
 <script defer src="{{ base_path }}/assets/js/home-timeline.js"></script>
 {% endif %}

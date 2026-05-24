@@ -1,5 +1,110 @@
 /* Site-specific UI overrides */
 
+/* Homepage hero fade-in */
+@keyframes home-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-home {
+  .page__hero--overlay .wrapper,
+  .main--with-hero .sidebar,
+  .home-metrics {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  &.home-enter-active {
+    .page__hero--overlay .wrapper {
+      animation: home-fade-up 820ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .main--with-hero .sidebar {
+      animation: home-fade-up 820ms cubic-bezier(0.22, 1, 0.36, 1) 120ms forwards;
+    }
+
+    .home-metrics {
+      animation: home-fade-up 820ms cubic-bezier(0.22, 1, 0.36, 1) 240ms forwards;
+    }
+  }
+
+  &.home-enter-done {
+    .page__hero--overlay .wrapper,
+    .main--with-hero .sidebar,
+    .home-metrics {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-home .page__hero--overlay .wrapper,
+  .page-home .main--with-hero .sidebar,
+  .page-home .home-metrics {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+/* Disable theme page-load intro animations for instant navigation */
+#main,
+.page__hero,
+.page__hero--overlay,
+.masthead,
+.breadcrumbs,
+.page__footer,
+.page__footer footer {
+  animation: none !important;
+  -webkit-animation: none !important;
+  opacity: 1 !important;
+}
+
+/* Fixed footer — no intro fade; sits above page content when scrolling */
+.page__footer {
+  position: fixed !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 20;
+  clear: both;
+  margin-top: 0 !important;
+}
+
+/* Stronger navbar underline hover */
+.masthead .greedy-nav .visible-links li:not(#theme-toggle) a {
+  position: relative;
+
+  &::before {
+    height: 2px;
+    background: color-mix(in srgb, var(--global-link-color) 75%, var(--global-text-color));
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &:hover {
+    color: color-mix(in srgb, var(--global-masthead-link-color) 65%, var(--global-text-color));
+  }
+
+  &:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+.masthead__menu-item.selected a::before {
+  display: none;
+}
+
 /* Circular author profile photo */
 .author__avatar img {
   width: 175px;
@@ -101,7 +206,10 @@
 
 /* Homepage timeline — alternating milestone track */
 .home-timeline {
-  margin: 0 0 1.25rem;
+  position: relative;
+  z-index: 0;
+  margin: 0 0 2.5rem;
+  isolation: isolate;
 
   &__heading {
     margin: 0 0 1rem;
@@ -148,7 +256,7 @@
   &__rail-fill {
     height: 0;
     background: var(--global-link-color);
-    transition: height 0.14s linear;
+    transition: none;
   }
 
   &__list {
@@ -164,7 +272,9 @@
     grid-template-columns: 1.75rem 1fr;
     gap: 0 0.75rem;
     align-items: start;
-    padding-bottom: 0.85rem;
+    padding-bottom: 1.15rem;
+    overflow: visible;
+    position: relative;
 
     &:last-child {
       padding-bottom: 0;
@@ -177,6 +287,8 @@
     display: flex;
     justify-content: center;
     padding-top: 0.35rem;
+    position: relative;
+    z-index: 2;
   }
 
   &__node-dot {
@@ -199,6 +311,8 @@
   &__year {
     grid-column: 2;
     grid-row: 1;
+    position: relative;
+    z-index: 1;
     margin: 0 0 0.15rem;
     font-size: $type-size-3;
     font-weight: 800;
@@ -211,15 +325,22 @@
   &__card {
     grid-column: 2;
     grid-row: 2;
+    position: relative;
+    z-index: 1;
+    transform: scale(1);
+    transform-origin: center;
     padding: 0.65rem 0.85rem;
     border: 1px solid color-mix(in srgb, var(--global-text-color) 12%, var(--global-border-color));
     border-radius: 0.65rem;
     background: var(--global-bg-color);
     box-shadow: 0 2px 10px color-mix(in srgb, var(--global-text-color) 8%, transparent);
-    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    transition:
+      transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 350ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 350ms ease;
 
     &:hover {
-      transform: translateY(-3px);
+      transform: scale(1) translateY(-3px);
       border-color: color-mix(in srgb, var(--global-link-color) 35%, var(--global-border-color));
       box-shadow: 0 10px 22px color-mix(in srgb, var(--global-text-color) 14%, transparent);
     }
@@ -269,7 +390,7 @@
       grid-template-columns: minmax(0, 1fr) 2.75rem minmax(0, 1fr);
       gap: 0 1rem;
       align-items: center;
-      padding-bottom: 1rem;
+      padding-bottom: 1.35rem;
     }
 
     &__node {
@@ -335,7 +456,8 @@
         opacity 0.55s ease,
         transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 
-      &.is-visible {
+      &.is-visible,
+      &.is-revealed {
         opacity: 1;
         transform: translateY(0);
       }
@@ -344,17 +466,16 @@
     .home-timeline__node-dot {
       transform: scale(0.82);
       opacity: 0.4;
+      background: var(--global-bg-color);
     }
 
-    .home-timeline__item.is-visible .home-timeline__node-dot {
+    /* Dot colour/fill is controlled by is-reached only — never is-active or is-visible */
+    .home-timeline__item.is-reached .home-timeline__node-dot {
       transform: scale(1);
       opacity: 1;
-    }
-
-    .home-timeline__item.is-active .home-timeline__node-dot {
-      transform: scale(1.12);
       background: var(--global-link-color);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--global-link-color) 22%, var(--global-bg-color));
+      box-shadow:
+        0 0 0 3px color-mix(in srgb, var(--global-link-color) 24%, var(--global-bg-color));
     }
 
     .home-timeline__year {
@@ -362,17 +483,28 @@
       opacity: 0.55;
     }
 
+    .home-timeline__item.is-reached .home-timeline__year {
+      opacity: 0.85;
+    }
+
     .home-timeline__item.is-active .home-timeline__year {
       opacity: 1;
       color: color-mix(in srgb, var(--global-link-color) 55%, var(--global-text-color));
     }
 
+    .home-timeline__item.is-active {
+      z-index: 2;
+    }
+
     .home-timeline__item.is-active .home-timeline__card {
-      transform: translateY(-2px) scale(1.02);
-      border-color: color-mix(in srgb, var(--global-link-color) 30%, var(--global-border-color));
-      box-shadow:
-        0 12px 28px color-mix(in srgb, var(--global-text-color) 16%, transparent),
-        0 0 0 1px color-mix(in srgb, var(--global-link-color) 12%, transparent);
+      z-index: 2;
+      transform: scale(1.05);
+      border-color: color-mix(in srgb, var(--global-link-color) 35%, var(--global-border-color));
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--global-text-color) 12%, transparent);
+    }
+
+    .home-timeline__item.is-active .home-timeline__card:hover {
+      transform: scale(1.05);
     }
 
     @media screen and (min-width: 768px) {
@@ -387,7 +519,8 @@
           transform: translateX(1.25rem) translateY(0.75rem);
         }
 
-        &.is-visible {
+        &.is-visible,
+        &.is-revealed {
           transform: translateX(0) translateY(0);
         }
       }
@@ -401,10 +534,25 @@
       transition: none;
     }
 
+    &--enhanced .home-timeline__card {
+      transition: none;
+    }
+
+    &--enhanced .home-timeline__item.is-active .home-timeline__card {
+      transform: scale(1.05);
+    }
+
     &--enhanced .home-timeline__node-dot {
       transform: none;
-      opacity: 1;
+      opacity: 0.4;
+      background: var(--global-bg-color);
       transition: none;
+    }
+
+    &--enhanced .home-timeline__item.is-reached .home-timeline__node-dot {
+      transform: none;
+      opacity: 1;
+      background: var(--global-link-color);
     }
 
     &--enhanced .home-timeline__rail-fill {
