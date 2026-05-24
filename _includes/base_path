@@ -1,5 +1,12 @@
-{% if site.url %}
+{%- comment -%}
+  Absolute site root for GitHub Pages project sites.
+  site.url + site.baseurl when configured; otherwise site.github.url
+  (which already includes the project path on github.io).
+{%- endcomment -%}
+{% if site.url and site.url != '' %}
   {% assign base_path = site.url | append: site.baseurl %}
-{% else %}
+{% elsif site.github.url %}
   {% assign base_path = site.github.url %}
+{% else %}
+  {% assign base_path = site.baseurl | default: '' %}
 {% endif %}
