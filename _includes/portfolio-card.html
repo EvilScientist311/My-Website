@@ -1,11 +1,9 @@
-{% include base_path %}
-
 {% if post.link %}
   {% assign card_url = post.link %}
 {% elsif post.paperurl contains "://" %}
   {% assign card_url = post.paperurl %}
 {% else %}
-  {% assign card_url = post.paperurl | prepend: base_path %}
+  {% assign card_url = post.paperurl | relative_url %}
 {% endif %}
 
 <article class="pdf-card">
