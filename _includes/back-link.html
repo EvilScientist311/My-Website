@@ -1,0 +1,31 @@
+{% include base_path %}
+
+{% if page.url == "/" or page.url == "/index.html" %}
+{% else %}
+  {% assign back_fallback = "/" | relative_url %}
+
+  {% if page.url contains "/derivations/" %}
+    {% unless page.url == "/derivations/" %}
+      {% assign back_fallback = "/derivations/" | relative_url %}
+    {% endunless %}
+  {% elsif page.collection == "publications" and page.category %}
+    {% if page.category == "lab-reports" %}
+      {% assign back_fallback = "/lab-reports/" | relative_url %}
+    {% else %}
+      {% assign back_fallback = "/derivations/" | append: page.category | append: "/" | relative_url %}
+    {% endif %}
+  {% elsif page.collection == "portfolio" %}
+    {% assign back_fallback = "/electrical-engineering/" | relative_url %}
+  {% elsif page.url == "/lab-reports/" or page.url == "/data-science/" or page.url == "/electrical-engineering/" %}
+    {% assign back_fallback = "/" | relative_url %}
+  {% endif %}
+
+  <nav class="page-back" aria-label="Back navigation">
+    <a
+      href="{{ back_fallback }}"
+      class="page-back__link"
+      data-back-link
+      data-fallback="{{ back_fallback }}"
+    >← Back</a>
+  </nav>
+{% endif %}

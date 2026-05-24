@@ -15,8 +15,6 @@
   }
 
   function initHeroEnter() {
-    document.body.classList.add("page-home");
-
     if (prefersReducedMotion) {
       document.body.classList.add("home-enter-active", "home-enter-done");
       return;

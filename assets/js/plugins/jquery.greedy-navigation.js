@@ -12,15 +12,14 @@ var $vlinks_persist_tail = $vlinks.children("*.persist.tail");
 var $hlinks = $("#site-nav .hidden-links");
 
 var breaks = [];
-var MOBILE_BREAKPOINT = 768;
+var MOBILE_BREAKPOINT = 924;
 
 function isMobileNav() {
   return window.innerWidth <= MOBILE_BREAKPOINT;
 }
 
 function updateMastheadPadding() {
-  var mastheadHeight = $(".masthead").height();
-  $("body").css("padding-top", mastheadHeight + "px");
+  var mastheadHeight = $(".masthead").outerHeight();
 
   if ($(".author__urls-wrapper button").is(":visible")) {
     $(".sidebar").css("padding-top", "");
@@ -47,12 +46,13 @@ function openHiddenLinks() {
 }
 
 function restoreAllLinksToVisible() {
+  var $cluster = $hlinks.children("li.masthead__nav-cluster");
+  if ($cluster.length) {
+    $cluster.appendTo($vlinks);
+  }
+
   while ($hlinks.children().length > 0) {
-    if ($vlinks_persist_tail.children().length > 0) {
-      $hlinks.children().first().insertBefore($vlinks_persist_tail);
-    } else {
-      $hlinks.children().first().appendTo($vlinks);
-    }
+    $hlinks.children().first().appendTo($vlinks);
   }
 
   breaks = [];
@@ -60,8 +60,9 @@ function restoreAllLinksToVisible() {
 }
 
 function collapseAllLinksForMobile() {
-  while ($vlinks.children("li:not(.persist)").length > 0) {
-    $vlinks.children("li:not(.persist)").last().prependTo($hlinks);
+  var $cluster = $vlinks.children("li.masthead__nav-cluster");
+  if ($cluster.length && !$cluster.parent().is($hlinks)) {
+    $cluster.prependTo($hlinks);
   }
 
   breaks = [];
@@ -77,40 +78,10 @@ function updateNav() {
   }
 
   restoreAllLinksToVisible();
-
-  var availableSpace = $btn.hasClass("hidden")
-    ? $nav.width()
-    : $nav.width() - $btn.width() - 30;
-
-  if ($vlinks.width() > availableSpace) {
-    while (
-      $vlinks.width() > availableSpace &&
-      $vlinks.children("*:not(.persist)").length > 0
-    ) {
-      breaks.push($vlinks.width());
-      $vlinks.children("*:not(.persist)").last().prependTo($hlinks);
-      availableSpace = $btn.hasClass("hidden")
-        ? $nav.width()
-        : $nav.width() - $btn.width() - 30;
-      $btn.removeClass("hidden");
-    }
-  } else {
-    while (breaks.length > 0 && availableSpace > breaks[breaks.length - 1]) {
-      if ($vlinks_persist_tail.children().length > 0) {
-        $hlinks.children().first().insertBefore($vlinks_persist_tail);
-      } else {
-        $hlinks.children().first().appendTo($vlinks);
-      }
-      breaks.pop();
-    }
-
-    if (breaks.length < 1) {
-      $btn.addClass("hidden");
-      closeHiddenLinks();
-    }
-  }
-
-  $btn.attr("count", breaks.length);
+  $btn.addClass("hidden");
+  closeHiddenLinks();
+  breaks = [];
+  $btn.attr("count", 0);
 }
 
 $btn.attr({

@@ -24,17 +24,13 @@ const browserPref = window.matchMedia('(prefers-color-scheme: dark)').matches ? 
 
 // Set the theme on page load or when explicitly called
 let setTheme = (theme) => {
-  const use_theme =
-    theme ||
-    localStorage.getItem("theme") ||
-    $("html").attr("data-theme") ||
-    browserPref;
+  const use_theme = theme || determineComputedTheme();
 
   if (use_theme === "dark") {
-    $("html").attr("data-theme", "dark");
+    $("html").attr("data-theme", "dark").attr("data-theme-active", "dark");
     $("#theme-icon").removeClass("fa-sun").addClass("fa-moon");
   } else if (use_theme === "light") {
-    $("html").removeAttr("data-theme");
+    $("html").removeAttr("data-theme").attr("data-theme-active", "light");
     $("#theme-icon").removeClass("fa-moon").addClass("fa-sun");
   }
 };
@@ -94,29 +90,14 @@ $(document).ready(function () {
   setTheme();
   window.matchMedia('(prefers-color-scheme: dark)')
         .addEventListener("change", (e) => {
-          if (!localStorage.getItem("theme")) {
+          const storedTheme = localStorage.getItem("theme");
+          if (!storedTheme || storedTheme === "system") {
             setTheme(e.matches ? "dark" : "light");
           }
         });
 
   // Enable the theme toggle
   $('#theme-toggle').on('click', toggleTheme);
-
-  // Enable the sticky footer
-  var bumpIt = function () {
-    $("body").css("padding-bottom", "0");
-    $("body").css("margin-bottom", $(".page__footer").outerHeight(true));
-  }
-  $(window).resize(function () {
-    didResize = true;
-  });
-  setInterval(function () {
-    if (didResize) {
-      didResize = false;
-      bumpIt();
-    }}, 250);
-  var didResize = false;
-  bumpIt();
 
   // FitVids init
   fitvids();
