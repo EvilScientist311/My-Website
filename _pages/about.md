@@ -1,9 +1,9 @@
 ---
 permalink: /
 title: "Welcome!"
-description: "I love learning new things. This site collects derivations, lab reports, data science projects, and electrical engineering work."
+description: "I love learning new things. On this site are some of the things I've done including derivations, lab reports, data analysis projects, and electrical engineering work."
 author_profile: true
-excerpt: "I love learning new things. This site collects derivations, lab reports, data science projects, and electrical engineering work."
+excerpt: "I love learning new things. On this site are some of the things I've done including derivations, lab reports, data analysis projects, and electrical engineering work."
 header:
   overlay_image: img/labpic.jpg
   overlay_filter: 0.35
