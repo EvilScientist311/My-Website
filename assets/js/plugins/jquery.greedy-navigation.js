@@ -30,15 +30,20 @@ function updateMastheadPadding() {
 }
 
 function closeHiddenLinks() {
-  $hlinks.addClass("hidden");
+  $hlinks.addClass("hidden").removeClass("is-open");
   $btn.removeClass("close");
   $btn.attr("aria-expanded", "false");
+  $("body").removeClass("mobile-nav-open");
 }
 
 function openHiddenLinks() {
-  $hlinks.removeClass("hidden");
+  $hlinks.removeClass("hidden").addClass("is-open");
   $btn.addClass("close");
   $btn.attr("aria-expanded", "true");
+
+  if (isMobileNav()) {
+    $("body").addClass("mobile-nav-open");
+  }
 }
 
 function restoreAllLinksToVisible() {
@@ -51,6 +56,7 @@ function restoreAllLinksToVisible() {
   }
 
   breaks = [];
+  closeHiddenLinks();
 }
 
 function collapseAllLinksForMobile() {
@@ -100,9 +106,7 @@ function updateNav() {
 
     if (breaks.length < 1) {
       $btn.addClass("hidden");
-      $btn.removeClass("close");
-      $hlinks.addClass("hidden");
-      $btn.attr("aria-expanded", "false");
+      closeHiddenLinks();
     }
   }
 
@@ -121,7 +125,7 @@ $hlinks.attr("id", "site-nav-menu");
 $btn.on("click", function (event) {
   event.stopPropagation();
 
-  if ($hlinks.hasClass("hidden")) {
+  if ($hlinks.hasClass("hidden") || !$hlinks.hasClass("is-open")) {
     openHiddenLinks();
   } else {
     closeHiddenLinks();
@@ -131,9 +135,8 @@ $btn.on("click", function (event) {
 $(document).on("click.mobileNav", function (event) {
   if (
     isMobileNav() &&
-    !$hlinks.hasClass("hidden") &&
-    !$nav.is(event.target) &&
-    $nav.has(event.target).length === 0
+    $hlinks.hasClass("is-open") &&
+    !$(event.target).closest("#site-nav").length
   ) {
     closeHiddenLinks();
   }
@@ -152,6 +155,9 @@ $hlinks.on("click", "a", function () {
 });
 
 $(window).on("resize", function () {
+  if (!isMobileNav()) {
+    $("body").removeClass("mobile-nav-open");
+  }
   updateNav();
 });
 

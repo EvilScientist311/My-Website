@@ -691,10 +691,31 @@ body {
    ========================================================================== */
 
 $mobile-nav-breakpoint: 768px;
+$mobile-sidebar-breakpoint: 924px;
 
-/* Hero text — smaller on phones, unchanged on desktop */
-.page__hero--overlay {
-  @media screen and (max-width: $mobile-nav-breakpoint - 1px) {
+/* Homepage — hide hero banner on mobile */
+@media screen and (max-width: $mobile-nav-breakpoint - 1px) {
+  body[data-page="home"] .page__hero--overlay {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+
+  body[data-page="home"] .main--with-hero {
+    margin-top: 0.5rem;
+  }
+
+  body[data-page="home"] .page-home.home-enter-active .page__hero--overlay .wrapper {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Hero text — smaller on non-home pages with banners */
+@media screen and (max-width: $mobile-nav-breakpoint - 1px) {
+  body:not([data-page="home"]) .page__hero--overlay {
     padding: 2rem 0;
 
     .page__title {
@@ -710,135 +731,45 @@ $mobile-nav-breakpoint: 768px;
   }
 }
 
-/* Mobile navbar: Home | theme | hamburger */
-@media screen and (max-width: $mobile-nav-breakpoint - 1px) {
-  .masthead__inner-wrap {
-    padding: 0.45em 0.65em;
+/* Non-home mobile — hide sidebar, full-width content */
+@media screen and (max-width: $mobile-sidebar-breakpoint - 1px) {
+  body.page-not-home .sidebar,
+  body.page-not-home .sidebar.sticky,
+  .sidebar.sidebar--hide-mobile {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
   }
 
-  .greedy-nav {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    align-items: center;
-    column-gap: 0.45rem;
-    min-width: 0;
+  .sidebar.sidebar--hide-mobile + .page,
+  .sidebar.sidebar--hide-mobile + .archive,
+  body.page-not-home #main > .page,
+  body.page-not-home #main > .archive {
+    width: 100% !important;
+    max-width: none !important;
+    float: none !important;
+    clear: both !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
-  .greedy-nav__toggle {
-    position: static;
-    grid-column: 3;
-    grid-row: 1;
-    justify-self: end;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-    margin: 0;
-    padding: 0.45rem;
-    border: 1px solid color-mix(in srgb, var(--global-text-color) 18%, var(--global-border-color));
-    border-radius: 0.55rem;
-    background: color-mix(in srgb, var(--global-text-color) 5%, var(--global-bg-color));
-    box-shadow: 0 1px 3px color-mix(in srgb, var(--global-text-color) 10%, transparent);
-    transition:
-      background 180ms ease,
-      border-color 180ms ease,
-      box-shadow 180ms ease;
-
-    &:hover,
-    &:active,
-    &.close {
-      background: color-mix(in srgb, var(--global-link-color) 12%, var(--global-bg-color));
-      border-color: color-mix(in srgb, var(--global-link-color) 35%, var(--global-border-color));
-      box-shadow: 0 2px 8px color-mix(in srgb, var(--global-text-color) 12%, transparent);
-    }
-
-    &:focus-visible {
-      outline: 2px solid color-mix(in srgb, var(--global-link-color) 55%, transparent);
-      outline-offset: 2px;
-    }
-  }
-
-  .greedy-nav .visible-links {
-    display: contents;
-
-    .masthead__brand {
-      grid-column: 1;
-      grid-row: 1;
-      min-width: 0;
-
-      a {
-        margin: 0;
-        padding: 0.35rem 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    .masthead__theme {
-      grid-column: 2;
-      grid-row: 1;
-      justify-self: center;
-
-      a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.5rem;
-        height: 2.5rem;
-        margin: 0;
-        padding: 0;
-        border: 1px solid color-mix(in srgb, var(--global-text-color) 14%, var(--global-border-color));
-        border-radius: 999px;
-      }
-    }
-
-    .masthead__nav-link {
-      display: none !important;
-    }
-  }
-
-  .greedy-nav .hidden-links {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    position: static;
-    top: auto;
-    right: auto;
-    width: 100%;
-    margin-top: 0.65rem;
-    padding: 0.35rem 0;
-    border-radius: 0.65rem;
-
-    &:before,
-    &:after {
-      display: none;
-    }
-
-    li a {
-      padding: 0.75rem 1rem;
-    }
-  }
-
-  .masthead .greedy-nav .visible-links li:not(#theme-toggle) a::before {
-    display: none;
+  body.page-not-home #main {
+    margin-top: 1rem;
+    padding-left: 0.85em;
+    padding-right: 0.85em;
   }
 }
 
-/* Desktop — keep theme toggle at end of nav row */
-@media screen and (min-width: $mobile-nav-breakpoint) {
-  .greedy-nav .visible-links .masthead__theme a {
-    display: flex;
-    justify-content: center;
-    width: 25px;
-  }
-}
-
-/* Mobile sidebar — stack profile, show social links inline */
-@media screen and (max-width: 924px) {
-  .sidebar {
-    margin-top: 0.75rem;
-    margin-bottom: 1.25rem;
+/* Homepage mobile — stacked profile */
+@media screen and (max-width: $mobile-sidebar-breakpoint - 1px) {
+  body[data-page="home"] .sidebar {
+    margin-top: 0;
+    margin-bottom: 1rem;
 
     [itemtype="http://schema.org/Person"] {
       display: flex;
@@ -860,9 +791,9 @@ $mobile-nav-breakpoint: 768px;
     .author__content {
       display: block;
       width: 100%;
-      max-width: 36rem;
+      max-width: none;
       padding: 0;
-      margin: 0 auto 0.85rem;
+      margin: 0 0 0.85rem;
     }
 
     .author__bio {
@@ -870,10 +801,11 @@ $mobile-nav-breakpoint: 768px;
     }
 
     .author__urls-wrapper {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       width: 100%;
-      max-width: 36rem;
-      margin: 0 auto;
+      margin: 0;
 
       button {
         display: none;
@@ -884,7 +816,7 @@ $mobile-nav-breakpoint: 768px;
       display: flex !important;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.35rem 1.1rem;
+      gap: 0.45rem 1rem;
       position: static;
       margin: 0;
       padding: 0;
@@ -905,16 +837,237 @@ $mobile-nav-breakpoint: 768px;
 
       a {
         margin-bottom: 0;
-        padding: 0.2rem 0;
+        padding: 0.25rem 0;
         font-size: $type-size-6;
       }
     }
   }
 
-  .main--with-hero .sidebar.sticky {
+  body[data-page="home"] .main--with-hero .sidebar.sticky {
     position: static;
     height: auto;
     overflow: visible;
     padding-top: 0 !important;
+  }
+}
+
+/* Mobile nav overlay */
+body.mobile-nav-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--global-text-color) 42%, transparent);
+  z-index: 18;
+  pointer-events: none;
+}
+
+/* Mobile navbar: title | theme | menu */
+@media screen and (max-width: $mobile-nav-breakpoint - 1px) {
+  .masthead {
+    z-index: 25;
+  }
+
+  .masthead__inner-wrap {
+    padding: 0.45em 0.65em;
+  }
+
+  .masthead .greedy-nav {
+    position: relative;
+    z-index: 26;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px minmax(44px, max-content);
+    grid-template-areas:
+      "brand theme menu"
+      "dropdown dropdown dropdown";
+    align-items: center;
+    column-gap: 0.45rem;
+    row-gap: 0;
+    min-width: 0;
+  }
+
+  .masthead .greedy-nav > button.greedy-nav__toggle {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    grid-area: menu;
+    z-index: 3;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--global-text-color) 28%, var(--global-border-color));
+    border-radius: 0.6rem;
+    background: color-mix(in srgb, var(--global-text-color) 14%, var(--global-bg-color));
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--global-text-color) 10%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+    color: var(--global-masthead-link-color);
+    font-family: $sans-serif-narrow;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      color 180ms ease;
+
+    .greedy-nav__toggle-icon,
+    .greedy-nav__toggle-close {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .greedy-nav__toggle-close {
+      display: none;
+    }
+
+    &.close {
+      .greedy-nav__toggle-icon {
+        display: none;
+      }
+
+      .greedy-nav__toggle-close {
+        display: inline;
+      }
+    }
+
+    &:hover,
+    &:active {
+      background: color-mix(in srgb, var(--global-link-color) 18%, var(--global-bg-color));
+      border-color: color-mix(in srgb, var(--global-link-color) 42%, var(--global-border-color));
+      box-shadow: 0 2px 10px color-mix(in srgb, var(--global-text-color) 16%, transparent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--global-link-color) 55%, transparent);
+      outline-offset: 2px;
+    }
+  }
+
+  .masthead .greedy-nav .visible-links {
+    display: contents;
+
+    .masthead__brand {
+      grid-area: brand;
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+
+      a {
+        display: block;
+        margin: 0;
+        padding: 0.35rem 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .masthead__theme {
+      grid-area: theme;
+      position: relative;
+      z-index: 2;
+      justify-self: center;
+      align-self: center;
+      margin: 0;
+
+      a {
+        position: relative;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid color-mix(in srgb, var(--global-text-color) 22%, var(--global-border-color));
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--global-text-color) 8%, var(--global-bg-color));
+        box-shadow: 0 1px 3px color-mix(in srgb, var(--global-text-color) 10%, transparent);
+        cursor: pointer;
+      }
+    }
+
+    .masthead__nav-link {
+      display: none !important;
+    }
+  }
+
+  .masthead .greedy-nav .hidden-links {
+    grid-area: dropdown;
+    position: relative;
+    z-index: 4;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    background: var(--global-bg-color);
+    box-shadow: none;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-0.45rem);
+    max-height: 0;
+    pointer-events: none;
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      max-height 260ms ease,
+      margin-top 220ms ease,
+      padding 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+
+    &:before,
+    &:after {
+      display: none;
+    }
+
+    &.is-open {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 24rem;
+      margin-top: 0.65rem;
+      padding: 0.35rem 0;
+      border-color: var(--global-border-color);
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--global-text-color) 14%, transparent);
+      pointer-events: auto;
+    }
+
+    &.hidden:not(.is-open) {
+      display: block !important;
+      visibility: hidden;
+    }
+
+    li a {
+      padding: 0.75rem 1rem;
+    }
+  }
+
+  .masthead .greedy-nav .visible-links li:not(#theme-toggle) a::before {
+    display: none;
+  }
+}
+
+/* Desktop — keep theme toggle at end of nav row */
+@media screen and (min-width: $mobile-nav-breakpoint) {
+  .greedy-nav .visible-links .masthead__theme a {
+    display: flex;
+    justify-content: center;
+    width: 25px;
+  }
+
+  body.mobile-nav-open::before {
+    display: none;
   }
 }
