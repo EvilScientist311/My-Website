@@ -13,8 +13,8 @@ title                    : "Home"
 title_separator          : "-"
 name                     : &name "Corey Anderson"
 description              : &description "Personal STEM portfolio — derivations, lab reports, data science, and electrical engineering projects."
-url                      : https://evilscientist311.github.io
-baseurl                  : ""
+url                      : "https://evilscientist311.github.io"
+baseurl                  : "/Evil-Scientist-Website"
 repository               : "EvilScientist311/Evil-Scientist-Website"
 
 # Site Author - The following control what appear as part of the author content on the side bar.
