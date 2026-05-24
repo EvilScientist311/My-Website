@@ -1,0 +1,18 @@
+{% include base_path %}
+
+{% if post.link %}
+  {% assign card_url = post.link %}
+{% elsif post.paperurl contains "://" %}
+  {% assign card_url = post.paperurl %}
+{% else %}
+  {% assign card_url = post.paperurl | prepend: base_path %}
+{% endif %}
+
+<article class="pdf-card">
+  <a class="pdf-card__link" href="{{ card_url }}" target="_blank" rel="noopener noreferrer">
+    <h3 class="pdf-card__title">{{ post.title }}</h3>
+    {% if post.excerpt %}
+      <div class="pdf-card__excerpt">{{ post.excerpt | markdownify }}</div>
+    {% endif %}
+  </a>
+</article>

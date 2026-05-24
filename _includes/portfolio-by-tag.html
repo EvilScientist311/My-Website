@@ -1,0 +1,9 @@
+{% include base_path %}
+
+<div class="pdf-cards">
+  {% for post in site.portfolio %}
+    {% if post.tags contains include.tag %}
+      {% include portfolio-card.html %}
+    {% endif %}
+  {% endfor %}
+</div>

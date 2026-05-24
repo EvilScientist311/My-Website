@@ -1,0 +1,9 @@
+{% include base_path %}
+
+<div class="pdf-cards">
+  {% for post in site.publications reversed %}
+    {% if post.category == include.category %}
+      {% include publication-card.html %}
+    {% endif %}
+  {% endfor %}
+</div>
