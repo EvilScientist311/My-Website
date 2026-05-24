@@ -22,10 +22,10 @@ repository               : "EvilScientist311/Evil-Scientist-Website"
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "img/labpic.jpg"
+  avatar           : "profile.png"
   name             : "Corey Anderson"
   pronouns         : # example: "she/her"  
-  bio              : "I love learning new things. This site collects derivations, lab reports, data science projects, and electrical engineering work."
+  bio              : "I'm a graduate of UNSW, with a Bachelor of Engineering (Honours) in Electrical Engineering and a Bachelor of Science in Physics."
   location         : # example: "Earth"
   employer         : # example: "Red Brick University"
   uri              : # URL

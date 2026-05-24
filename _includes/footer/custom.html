@@ -12,3 +12,8 @@
 </script>
 
 <!-- end custom footer snippets -->
+
+{% include base_path %}
+{% if page.url == "/" %}
+<script defer src="{{ base_path }}/assets/js/home-timeline.js"></script>
+{% endif %}
