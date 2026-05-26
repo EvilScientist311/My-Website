@@ -1,14 +1,12 @@
-{% if post.paperurl contains "://" %}
-  {% assign pdf_url = post.paperurl %}
-{% else %}
-  {% assign pdf_url = post.paperurl | relative_url %}
-{% endif %}
+{% assign pdf_url = post.paperurl | default: page.paperurl %}
+{% capture pdf_url %}{% include resolve-url.html url=pdf_url %}{% endcapture %}
 
 <article class="pdf-card">
   <a class="pdf-card__link" href="{{ pdf_url }}" target="_blank" rel="noopener noreferrer">
-    <h3 class="pdf-card__title">{{ post.title }}</h3>
-    {% if post.excerpt %}
-      <div class="pdf-card__excerpt">{{ post.excerpt | markdownify }}</div>
+    <h3 class="pdf-card__title">{{ post.title | default: page.title }}</h3>
+    {% assign card_excerpt = post.excerpt | default: page.excerpt %}
+    {% if card_excerpt %}
+      <div class="pdf-card__excerpt">{{ card_excerpt | markdownify }}</div>
     {% endif %}
   </a>
 </article>

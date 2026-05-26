@@ -1,0 +1,5 @@
+{%- if include.url contains "://" -%}
+  {{- include.url -}}
+{%- else -%}
+  {{- include.url | relative_url -}}
+{%- endif -%}
